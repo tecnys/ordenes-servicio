@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orden de Servicio TI - CECAMET</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  .header {
+    background: white;
+    padding: 20px;
+    text-align: center;
+  }
+  .header img {
+    max-height: 160px;
+    max-width: 100%;
+  }
+  .titulo-principal {
+    text-align: center;
+    padding: 15px 20px;
+    background: #2c5f7f;
+    color: white;
+    border-top: 3px solid #2c5f7f;
+    border-bottom: 3px solid #2c5f7f;
+  }
+  .titulo-principal h1 {
+    font-size: 22px;
+    margin-bottom: 3px;
+    letter-spacing: 1px;
+  }
+  .titulo-principal p {
+    font-size: 14px;
+    opacity: 0.95;
+    letter-spacing: 1px;
+  }
+  .form-body { padding: 30px; }
+  .section-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #2c5f7f;
+    border-bottom: 2px solid #2c5f7f;
+    padding-bottom: 6px;
+    margin: 20px 0 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .section-title:first-child { margin-top: 0; }
+  .row { display: flex; gap: 15px; flex-wrap: wrap; }
+  .field { flex: 1; min-width: 200px; margin-bottom: 15px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #444;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #2c5f7f;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  .required::after { content: " *"; color: #d33; }
+  button {
+    width: 100%;
+    padding: 14px;
+    background: #2c5f7f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.2s;
+  }
+  button:hover { background: #1e4159; }
+  button:disabled { background: #999; cursor: not-allowed; }
+  .mensaje {
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 20px;
+    text-align: center;
+    font-weight: 500;
+    display: none;
+  }
+  .mensaje.ok { background: #d4edda; color: #155724; display: block; }
+  .mensaje.error { background: #f8d7da; color: #721c24; display: block; }
+  .folio {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c5f7f;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <img src="https://tabasco.gob.mx/sites/default/files/2026-04/LOGO_remove.png" alt="CECAMET">
+  </div>
+
+  <div class="titulo-principal">
+    <h1>ORDEN DE SERVICIO</h1>
+    <p>Tecnologías de la Información</p>
+  </div>
+
+  <div class="form-body">
+    <form id="formSolicitud">
+
+      <div class="section-title">Datos del Solicitante</div>
+
+      <div class="row">
+        <div class="field">
+          <label class="required">Nombre completo</label>
+          <input type="text" name="nombre_solicitante" required>
+        </div>
+        <div class="field">
+          <label class="required">Cargo</label>
+          <input type="text" name="cargo" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="required">Área / Departamento</label>
+          <input type="text" name="area" required>
+        </div>
+        <div class="field">
+          <label>Correo institucional</label>
+          <input type="email" name="correo">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Teléfono / Extensión</label>
+          <input type="text" name="telefono">
+        </div>
+        <div class="field">
+          <label>Ubicación física</label>
+          <input type="text" name="ubicacion" placeholder="Ej: Piso 2, oficina 204">
+        </div>
+      </div>
+
+      <div class="section-title">Datos del Equipo</div>
+
+      <div class="row">
+        <div class="field">
+          <label>Tipo de equipo</label>
+          <select name="tipo_equipo">
+            <option value="">-- Selecciona --</option>
+            <option>PC de escritorio</option>
+            <option>Laptop</option>
+            <option>Impresora</option>
+            <option>Escáner</option>
+            <option>Proyector</option>
+            <option>Teléfono</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Marca / Modelo</label>
+          <input type="text" name="marca_modelo">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>No. de inventario</label>
+          <input type="text" name="inventario">
+        </div>
+        <div class="field">
+          <label>No. de serie</label>
+          <input type="text" name="numero_serie">
+        </div>
+      </div>
+
+      <div class="section-title">Detalles de la Solicitud</div>
+
+      <div class="row">
+        <div class="field">
+          <label class="required">Prioridad</label>
+          <select name="prioridad" required>
+            <option value="">-- Selecciona --</option>
+            <option>Baja</option>
+            <option>Media</option>
+            <option>Alta</option>
+            <option>Urgente</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="required">Tipo de servicio</label>
+          <select name="tipo_servicio" required>
+            <option value="">-- Selecciona --</option>
+            <option>Preventivo</option>
+            <option>Correctivo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="required">Motivo de la solicitud</label>
+        <select name="motivo" required>
+          <option value="">-- Selecciona --</option>
+          <option>No enciende / No inicia</option>
+          <option>Se reinicia</option>
+          <option>Malware / Virus</option>
+          <option>Bloqueo / Lentitud</option>
+          <option>Impresora</option>
+          <option>Escáner</option>
+          <option>Videoproyector</option>
+          <option>Sistema operativo</option>
+          <option>Mensaje de error</option>
+          <option>Problema de regulador</option>
+          <option>Mouse / Teclado / Monitor</option>
+          <option>Actualización / Instalación</option>
+          <option>Antivirus</option>
+          <option>Respaldo de información</option>
+          <option>Mantenimiento preventivo</option>
+          <option>Problemas de internet</option>
+          <option>Correo institucional</option>
+          <option>Otro</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="required">Descripción del problema</label>
+        <textarea name="descripcion_problema" required placeholder="Describe con detalle qué está pasando..."></textarea>
+      </div>
+
+      <button type="submit" id="btnEnviar">Enviar Solicitud</button>
+    </form>
+
+    <div id="mensaje" class="mensaje"></div>
+    <div id="folioMostrado" class="folio"></div>
+  </div>
+</div>
+
+<script>
+  // ⚠️ AQUÍ VA TU URL DE APPS SCRIPT
+  const URL_API="https://script.google.com/macros/s/AKfycbxtAVxyndln5yIo5-fwu2LdN2hGERXqehYJO_nd79L3-zi0SVKY0n5Vs2n-SCVhvuk0Lw/exec";
+
+  document.getElementById('formSolicitud').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnEnviar');
+    const mensaje = document.getElementById('mensaje');
+    const folioDiv = document.getElementById('folioMostrado');
+
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    mensaje.className = 'mensaje';
+    folioDiv.textContent = '';
+
+    const formData = new FormData(e.target);
+    const datos = { accion: 'crearOrden' };
+    formData.forEach((v, k) => datos[k] = v);
+
+    try {
+      const resp = await fetch(URL_API, {
+        method: 'POST',
+        body: JSON.stringify(datos),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      });
+      const result = await resp.json();
+
+      if (result.ok) {
+        mensaje.className = 'mensaje ok';
+        mensaje.textContent = '✅ Solicitud enviada correctamente';
+        folioDiv.textContent = 'Folio asignado: ' + result.folio;
+        e.target.reset();
+      } else {
+        mensaje.className = 'mensaje error';
+        mensaje.textContent = '❌ Error: ' + (result.error || 'Intenta de nuevo');
+      }
+    } catch (err) {
+      mensaje.className = 'mensaje error';
+      mensaje.textContent = '❌ Error de conexión: ' + err.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Enviar Solicitud';
+  });
+</script>
+
+</body>
+</html>
