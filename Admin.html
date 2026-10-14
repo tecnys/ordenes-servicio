@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del Técnico - CECAMET</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    padding: 20px;
+    color: #333;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  .header {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .header img { max-height: 70px; }
+  .header h1 {
+    color: #2c5f7f;
+    font-size: 20px;
+    margin-top: 10px;
+  }
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  .tab {
+    padding: 10px 20px;
+    background: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .tab.active { background: #2c5f7f; color: white; }
+  .tab:hover:not(.active) { background: #e6ecf1; }
+
+  .lista {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  .orden {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .orden:hover { background: #f7fafc; }
+  .orden:last-child { border-bottom: none; }
+  .orden .info { flex: 1; }
+  .orden .folio {
+    font-weight: bold;
+    color: #2c5f7f;
+    font-size: 15px;
+  }
+  .orden .detalle {
+    font-size: 13px;
+    color: #666;
+    margin-top: 3px;
+  }
+  .badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .badge.abierta { background: #fff3cd; color: #856404; }
+  .badge.cerrada { background: #d4edda; color: #155724; }
+  .badge.urgente { background: #f8d7da; color: #721c24; }
+
+  .vacio {
+    padding: 40px;
+    text-align: center;
+    color: #999;
+  }
+
+  .modal-bg {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .modal-bg.activo { display: flex; justify-content: center; align-items: flex-start; }
+  .modal {
+    background: white;
+    border-radius: 10px;
+    max-width: 800px;
+    width: 100%;
+    padding: 25px;
+    margin-top: 20px;
+  }
+  .modal h2 {
+    color: #2c5f7f;
+    margin-bottom: 15px;
+    font-size: 20px;
+  }
+  .modal h3 {
+    color: #2c5f7f;
+    font-size: 14px;
+    margin: 15px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #2c5f7f;
+    text-transform: uppercase;
+  }
+  .modal .fila {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .modal .fila strong { min-width: 160px; color: #555; }
+  .modal .field { margin-bottom: 12px; }
+  .modal label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #444;
+  }
+  .modal input, .modal textarea, .modal select {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .modal textarea { resize: vertical; min-height: 70px; }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end;
+  }
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .btn-cerrar { background: #e0e0e0; color: #333; }
+  .btn-guardar { background: #2c5f7f; color: white; }
+  .btn-imprimir { background: #28a745; color: white; }
+  .btn-guardar:hover { background: #1e4159; }
+  .btn-imprimir:hover { background: #1e7e34; }
+
+  .mensaje-modal {
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+    display: none;
+  }
+  .mensaje-modal.ok { background: #d4edda; color: #155724; display: block; }
+  .mensaje-modal.error { background: #f8d7da; color: #721c24; display: block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <img src="https://tabasco.gob.mx/sites/default/files/2026-04/LOGO_remove.png" alt="CECAMET">
+    <h1>Panel del Técnico — Órdenes de Servicio TI</h1>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="filtrar('Abierta', this)">🟡 Abiertas</button>
+    <button class="tab" onclick="filtrar('Cerrada', this)">🟢 Cerradas</button>
+    <button class="tab" onclick="filtrar('todas', this)">📋 Todas</button>
+  </div>
+
+  <div class="lista" id="lista">
+    <div class="vacio">Cargando órdenes...</div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalFolio">Orden</h2>
+
+    <h3>Datos del Solicitante</h3>
+    <div id="datosSolicitante"></div>
+
+    <h3>Datos del Equipo</h3>
+    <div id="datosEquipo"></div>
+
+    <h3>Motivo y Descripción</h3>
+    <div id="datosMotivo"></div>
+
+    <h3>Cierre del Servicio (llenar por el técnico)</h3>
+    <div class="field">
+      <label>Técnico asignado</label>
+      <input type="text" id="tecnico_asignado">
+    </div>
+    <div class="field">
+      <label>Diagnóstico</label>
+      <textarea id="diagnostico" placeholder="Describe qué se encontró..."></textarea>
+    </div>
+    <div class="field">
+      <label>Solución aplicada</label>
+      <textarea id="solucion" placeholder="Describe qué se hizo..."></textarea>
+    </div>
+    <div class="field">
+      <label>Refacciones / Materiales utilizados</label>
+      <input type="text" id="refacciones" placeholder="Ej: Cable HDMI, tóner, etc.">
+    </div>
+    <div class="field">
+      <label>Estado final</label>
+      <select id="estado_final">
+        <option>Reparado</option>
+        <option>Pendiente de refacción</option>
+        <option>No reparable</option>
+        <option>Requiere cambio de equipo</option>
+      </select>
+    </div>
+
+    <div class="mensaje-modal" id="mensajeModal"></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-cerrar" onclick="cerrarModal()">Cerrar</button>
+      <button class="btn btn-imprimir" onclick="imprimirOrden()">🖨️ Imprimir</button>
+      <button class="btn btn-guardar" onclick="guardarCierre()">💾 Guardar Cierre</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const URL_API = "https://script.google.com/macros/s/AKfycbxtAVxyndln5yIo5-fwu2LdN2hGERXqehYJO_nd79L3-zi0SVKY0n5Vs2n-SCVhvuk0Lw/exec";
+  let todasLasOrdenes = [];
+  let ordenActual = null;
+
+  async function cargarOrdenes() {
+    try {
+      const resp = await fetch(URL_API + '?accion=listarOrdenes');
+      const data = await resp.json();
+      if (data.ok) {
+        todasLasOrdenes = data.ordenes;
+        mostrarLista(todasLasOrdenes);
+      }
+    } catch (err) {
+      document.getElementById('lista').innerHTML = '<div class="vacio">Error al cargar: ' + err.message + '</div>';
+    }
+  }
+
+  function mostrarLista(ordenes) {
+    const lista = document.getElementById('lista');
+    if (ordenes.length === 0) {
+      lista.innerHTML = '<div class="vacio">No hay órdenes para mostrar</div>';
+      return;
+    }
+    lista.innerHTML = '';
+    ordenes.forEach(o => {
+      const div = document.createElement('div');
+      div.className = 'orden';
+      div.onclick = () => abrirOrden(o.folio);
+      const estado = o.estado || 'Abierta';
+      const prioridad = o.prioridad || '';
+      div.innerHTML = `
+        <div class="info">
+          <div class="folio">${o.folio}</div>
+          <div class="detalle">${o.fecha_solicitud} ${o.hora_solicitud} · ${o.nombre_solicitante} (${o.area})</div>
+          <div class="detalle">🖥️ ${o.tipo_equipo || 'N/A'} · Motivo: ${o.motivo}</div>
+        </div>
+        <div>
+          ${prioridad === 'Urgente' ? '<span class="badge urgente">' + prioridad + '</span> ' : ''}
+          <span class="badge ${estado.toLowerCase()}">${estado}</span>
+        </div>
+      `;
+      lista.appendChild(div);
+    });
+  }
+
+  function filtrar(estado, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    if (estado === 'todas') {
+      mostrarLista(todasLasOrdenes);
+    } else {
+      mostrarLista(todasLasOrdenes.filter(o => (o.estado || 'Abierta') === estado));
+    }
+  }
+
+  function abrirOrden(folio) {
+    const orden = todasLasOrdenes.find(o => o.folio === folio);
+    if (!orden) return;
+    ordenActual = orden;
+
+    document.getElementById('modalFolio').textContent = 'Orden: ' + orden.folio;
+
+    document.getElementById('datosSolicitante').innerHTML = `
+      <div class="fila"><strong>Nombre:</strong> ${orden.nombre_solicitante || ''}</div>
+      <div class="fila"><strong>Cargo:</strong> ${orden.cargo || ''}</div>
+      <div class="fila"><strong>Área:</strong> ${orden.area || ''}</div>
+      <div class="fila"><strong>Correo:</strong> ${orden.correo || ''}</div>
+      <div class="fila"><strong>Teléfono:</strong> ${orden.telefono || ''}</div>
+      <div class="fila"><strong>Ubicación:</strong> ${orden.ubicacion || ''}</div>
+    `;
+
+    document.getElementById('datosEquipo').innerHTML = `
+      <div class="fila"><strong>Tipo:</strong> ${orden.tipo_equipo || ''}</div>
+      <div class="fila"><strong>Marca/Modelo:</strong> ${orden.marca_modelo || ''}</div>
+      <div class="fila"><strong>No. inventario:</strong> ${orden.inventario || ''}</div>
+      <div class="fila"><strong>No. serie:</strong> ${orden.numero_serie || ''}</div>
+    `;
+
+    document.getElementById('datosMotivo').innerHTML = `
+      <div class="fila"><strong>Prioridad:</strong> ${orden.prioridad || ''}</div>
+      <div class="fila"><strong>Tipo servicio:</strong> ${orden.tipo_servicio || ''}</div>
+      <div class="fila"><strong>Motivo:</strong> ${orden.motivo || ''}</div>
+      <div class="fila"><strong>Descripción:</strong> ${orden.descripcion_problema || ''}</div>
+    `;
+
+    document.getElementById('tecnico_asignado').value = '';
+    document.getElementById('diagnostico').value = '';
+    document.getElementById('solucion').value = '';
+    document.getElementById('refacciones').value = '';
+    document.getElementById('estado_final').value = 'Reparado';
+    document.getElementById('mensajeModal').className = 'mensaje-modal';
+
+    document.getElementById('modalBg').classList.add('activo');
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalBg').classList.remove('activo');
+    ordenActual = null;
+  }
+
+  async function guardarCierre() {
+    if (!ordenActual) return;
+    const msg = document.getElementById('mensajeModal');
+    const datos = {
+      accion: 'actualizarOrden',
+      folio: ordenActual.folio,
+      tecnico_asignado: document.getElementById('tecnico_asignado').value,
+      diagnostico: document.getElementById('diagnostico').value,
+      solucion: document.getElementById('solucion').value,
+      refacciones: document.getElementById('refacciones').value,
+      estado_final: document.getElementById('estado_final').value
+    };
+
+    if (!datos.tecnico_asignado || !datos.diagnostico || !datos.solucion) {
+      msg.className = 'mensaje-modal error';
+      msg.textContent = 'Llena técnico, diagnóstico y solución';
+      return;
+    }
+
+    try {
+      const resp = await fetch(URL_API, {
+        method: 'POST',
+        body: JSON.stringify(datos),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      });
+      const result = await resp.json();
+      if (result.ok) {
+        msg.className = 'mensaje-modal ok';
+        msg.textContent = '✅ Cierre guardado correctamente';
+        setTimeout(() => {
+          cerrarModal();
+          cargarOrdenes();
+        }, 1200);
+      } else {
+        msg.className = 'mensaje-modal error';
+        msg.textContent = '❌ Error: ' + (result.error || 'Intenta de nuevo');
+      }
+    } catch (err) {
+      msg.className = 'mensaje-modal error';
+      msg.textContent = '❌ Error de conexión: ' + err.message;
+    }
+  }
+
+  function imprimirOrden() {
+    if (!ordenActual) return;
+    const o = ordenActual;
+    const tecnicoNombre = document.getElementById('tecnico_asignado').value;
+    const win = window.open('', '_blank');
+    win.document.write(`
+      <html><head><title>Orden ${o.folio}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 30px; color: #333; }
+        h1 { color: #2c5f7f; font-size: 20px; border-bottom: 3px solid #2c5f7f; padding-bottom: 10px; }
+        h2 { color: #2c5f7f; font-size: 14px; margin-top: 20px; text-transform: uppercase; border-bottom: 2px solid #2c5f7f; padding-bottom: 4px; }
+        .fila { margin: 6px 0; font-size: 13px; }
+        .fila strong { display: inline-block; min-width: 180px; }
+        .firma { margin-top: 80px; display: flex; justify-content: space-around; }
+        .firma div { text-align: center; border-top: 1px solid #333; padding-top: 8px; width: 250px; font-size: 13px; }
+      </style></head><body>
+        <h1>ORDEN DE SERVICIO — CECAMET · Tecnologías de la Información</h1>
+        <h2>Información General</h2>
+        <div class="fila"><strong>Folio:</strong> ${o.folio}</div>
+        <div class="fila"><strong>Fecha solicitud:</strong> ${o.fecha_solicitud} ${o.hora_solicitud}</div>
+        <div class="fila"><strong>Prioridad:</strong> ${o.prioridad}</div>
+        <div class="fila"><strong>Tipo de servicio:</strong> ${o.tipo_servicio}</div>
+        <h2>Solicitante</h2>
+        <div class="fila"><strong>Nombre:</strong> ${o.nombre_solicitante}</div>
+        <div class="fila"><strong>Cargo:</strong> ${o.cargo}</div>
+        <div class="fila"><strong>Área:</strong> ${o.area}</div>
+        <div class="fila"><strong>Correo:</strong> ${o.correo}</div>
+        <div class="fila"><strong>Teléfono:</strong> ${o.telefono}</div>
+        <div class="fila"><strong>Ubicación:</strong> ${o.ubicacion}</div>
+        <h2>Equipo</h2>
+        <div class="fila"><strong>Tipo:</strong> ${o.tipo_equipo}</div>
+        <div class="fila"><strong>Marca/Modelo:</strong> ${o.marca_modelo}</div>
+        <div class="fila"><strong>No. inventario:</strong> ${o.inventario}</div>
+        <div class="fila"><strong>No. serie:</strong> ${o.numero_serie}</div>
+        <h2>Motivo y Descripción</h2>
+        <div class="fila"><strong>Motivo:</strong> ${o.motivo}</div>
+        <div class="fila"><strong>Descripción:</strong> ${o.descripcion_problema}</div>
+        <h2>Cierre del Servicio</h2>
+        <div class="fila"><strong>Técnico:</strong> ${tecnicoNombre}</div>
+        <div class="fila"><strong>Diagnóstico:</strong> ${document.getElementById('diagnostico').value}</div>
+        <div class="fila"><strong>Solución:</strong> ${document.getElementById('solucion').value}</div>
+        <div class="fila"><strong>Refacciones:</strong> ${document.getElementById('refacciones').value}</div>
+        <div class="fila"><strong>Estado final:</strong> ${document.getElementById('estado_final').value}</div>
+        <div class="firma">
+          <div>${o.nombre_solicitante}<br>Solicitante</div>
+          <div>${tecnicoNombre}<br>Técnico</div>
+        </div>
+      </body></html>
+    `);
+    win.document.close();
+    setTimeout(() => win.print(), 300);
+  }
+
+  cargarOrdenes();
+</script>
+
+</body>
+</html>
